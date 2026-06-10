@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  checks: read
 
 jobs:
   check:
@@ -14,17 +15,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
-
-      - uses: DeterminateSystems/nix-installer-action@v22
-        with:
-          # Plain upstream Nix is sufficient; this job just runs
-          # `nix flake check` and doesn't gate on evaluator version.
-          # Skipping Determinate avoids the FlakeHub login path.
-          determinate: false
-
-      - name: Run tests
-        run: nix flake check
+      # Release tags point at commits already pushed to main, where the
+      # Flake Check workflow runs the same suite. Reuse that result
+      # instead of running the check a second time in parallel.
+      - name: Wait for Flake Check on the tagged commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for _ in $(seq 1 60); do
+            conclusion=$(gh api \
+              "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/check-runs?check_name=Flake%20check" \
+              --jq '[.check_runs[] | select(.status == "completed")][0].conclusion // empty')
+            case "$conclusion" in
+              success) echo "Flake Check passed for ${GITHUB_SHA}"; exit 0 ;;
+              "") echo "Flake Check not finished for ${GITHUB_SHA}; waiting..."; sleep 30 ;;
+              *) echo "Flake Check concluded '${conclusion}' for ${GITHUB_SHA}" >&2; exit 1 ;;
+            esac
+          done
+          echo "Timed out waiting for Flake Check on ${GITHUB_SHA}" >&2
+          exit 1
 
   release:
     name: Create Release
