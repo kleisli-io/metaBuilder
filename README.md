@@ -5,6 +5,10 @@
 A typed builder DSL built on
 [nix-effects](https://github.com/kleisli-io/nix-effects).
 
+Full documentation lives at
+[docs.kleisli.io/metaBuilder](https://docs.kleisli.io/metaBuilder):
+manual, theory, worked examples, and generated API reference.
+
 metaBuilder describes builders as typed values: parameters, sources,
 dependencies, tools, outputs, evidence, validations, descriptors, and
 operations are generated datatypes. The same typed spec builds an
@@ -87,6 +91,17 @@ self-documentation, dry-run plans, and materialized derivations:
 
 ## Quick start
 
+As a flake input:
+
+```nix
+{
+  inputs.metaBuilder.url = "github:kleisli-io/metaBuilder";
+  # mb = metaBuilder.lib.mkMb pkgs
+}
+```
+
+From a checkout:
+
 ```nix
 let
   pkgs = (import ./locked.nix "nixpkgs") { };
@@ -109,6 +124,13 @@ Or via flake:
 
 ```bash
 nix build .#checks.x86_64-linux.default
+```
+
+Kernel-heavy checks (long normalizations, minutes to hours) live in a
+separate suite excluded from `tests` and `checks`:
+
+```bash
+nix-unit --flake .#tests-heavy
 ```
 
 ## License

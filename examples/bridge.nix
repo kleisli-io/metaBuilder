@@ -66,10 +66,12 @@ let
   phrase = text: math: { inherit text math; };
   term = text: math: value: { inherit text math value; };
 
-  kernelCheck = { name, statement, type, proof }:
+  # heavy: the check normalizes large concrete terms (minutes of kernel
+  # evaluation); its test lands in the heavy suite instead of the default.
+  kernelCheck = { name, statement, type, proof, heavy ? false }:
     let result = H.checkHoas type.value proof.value;
     in {
-      inherit name;
+      inherit name heavy;
       statement = statement.text;
       statementMath = statement.math;
       type = type.text;
@@ -840,6 +842,7 @@ let
     })
     (kernelCheck {
       name = "mattagfoldk-agrees-with-drytagfoldk-forall-p";
+      heavy = true;
       statement = phrase "∀p. matTagFoldK p = dryTagFoldK p : listOf StepTag"
         "\\forall p.\\ \\mathsf{matTagFoldK}\\,p = \\mathsf{dryTagFoldK}\\,p : \\operatorname{List}(\\mathsf{StepTag})";
       type = term "∀p:listOf BuilderEff. Eq (listOf StepTag) (matTagFoldK p) (dryTagFoldK p)"
@@ -882,7 +885,7 @@ in
     tests = builtins.listToAttrs
       (map
         (theorem: {
-          name = "bridge-theorem-${theorem.name}";
+          name = "${lib.optionalString (theorem.heavy or false) "heavy-"}bridge-theorem-${theorem.name}";
           value = { expr = theorem.ok; expected = true; };
         })
         theoremList)
@@ -937,8 +940,10 @@ in
       # both examples (structural agreement), and both reproduce the tags of
       # live materialize's emitted step constructors. The kernel theorem
       # mattagfoldk-agrees-with-drytagfoldk-forall-p proves the agreement
-      # ∀p; this gates the two concrete instances.
-      "bridge-matfoldk-tag-fold-agrees-with-dryrun" = {
+      # ∀p; this gates the two concrete instances. heavy: each fold
+      # application runs verifyAndExtract (typecheck + kernel normalization)
+      # over a full example op list.
+      "heavy-bridge-matfoldk-tag-fold-agrees-with-dryrun" = {
         expr =
           let toTags = mat: map (con: stepConToTag.${con}) (materializeStepCons mat);
           in {

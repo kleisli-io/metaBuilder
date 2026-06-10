@@ -4,6 +4,7 @@ let
   inherit (self) spec value;
 in
 api.mk {
+  title = "IDL example";
   description = "IDL example: multi-language protobuf code generation via the IdlBuilder ornament and internalized program interpreters.";
   sourceFiles = [
     {

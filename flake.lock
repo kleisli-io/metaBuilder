@@ -30,11 +30,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779307220,
-        "narHash": "sha256-gbMuA7Fg+dL/Gbbo/H/y+SndJrLZiVAZNMT5ETzLVXI=",
+        "lastModified": 1781091222,
+        "narHash": "sha256-teecV5L++L30XWAyf/J89s2g18olONyxhtHpiVYKE58=",
         "owner": "kleisli-io",
         "repo": "nix-effects",
-        "rev": "e73b25092283f3bbd499cb8563447e5ee8a52732",
+        "rev": "0a616a611cf76cb1aaaef0465d63996896cd6137",
         "type": "github"
       },
       "original": {

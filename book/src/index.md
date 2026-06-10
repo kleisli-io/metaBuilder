@@ -1,6 +1,7 @@
 metaBuilder describes builders as typed values. The same spec can
 drive validation, schema extraction, documentation, dependency
-graphs, dry runs, and materialization.
+graphs, dry runs, and materialization. Source and releases live on
+[GitHub](https://github.com/kleisli-io/metaBuilder).
 
 ## Manual
 
@@ -20,5 +21,9 @@ with source pages and generated views.
 
 ## API Reference
 
-Use the API reference when you need exact operations, datatypes,
-ornaments, program views, or helper modules.
+Use the API reference when you need exact
+[operations](/metaBuilder/core-api/operations) and
+[descriptions](/metaBuilder/core-api/descriptions),
+[datatypes](/metaBuilder/reference/datatypes) and
+[schemas](/metaBuilder/reference/schemas), ornaments, program views,
+or helper modules.

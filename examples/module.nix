@@ -1,4 +1,4 @@
-{ api, self, docsCheckProofs ? true, ... }:
+{ api, lib, self, docsCheckProofs ? true, ... }:
 
 let
   bridgeModel = self.bridgeModel.value;
@@ -10,15 +10,21 @@ let
   inlineMath = value: "$" + value + "$";
   displayMath = value: "$$\n" + value + "\n$$";
 
-  renderTheorem = theorem: ''
-    ### `${theorem.name}`
+  # Heavy theorems (long normalizations) are never forced in docs builds;
+  # their kernel checks run in the heavy test suite.
+  renderTheorem = theorem:
+    let checked = docsCheckProofs && !(theorem.heavy or false);
+    in ''
+      ### `${theorem.name}`
 
-    ${displayMath theorem.statementMath}
+      ${displayMath theorem.statementMath}
 
-    - Type: ${inlineMath theorem.typeMath}
-    - Proof: ${inlineMath theorem.proofMath}
-    - Kernel result: `${if docsCheckProofs then theorem.resultTag else "skipped"}`
-  '';
+      - Type: ${inlineMath theorem.typeMath}
+      - Proof: ${inlineMath theorem.proofMath}
+      - Kernel result: `${if checked then theorem.resultTag else "skipped"}`${
+          lib.optionalString (docsCheckProofs && (theorem.heavy or false))
+            " (long normalization; verified in the heavy test suite)"}
+    '';
 
   renderedTheorems =
     builtins.concatStringsSep "\n\n" (map renderTheorem bridgeModel.theoremList);
@@ -51,18 +57,29 @@ let
     doc = ''
       # Bridge Example
 
-      The Node and C examples are related by proof objects checked through the
-      nix-effects kernel. The bridge proves how both builders refine
-      `BuilderSpec`, how their forget maps compute, and how selected
-      intersections over their actual tool and output-format lists normalize.
+      The shipped builder kinds are related by proof objects checked through
+      the nix-effects kernel. For each of the four example builders — Node
+      service, C code generation, OCI image, and IDL — the bridge proves how
+      the ornament refines its base, how its forget map computes, and how
+      program compilation factors through forget. It also pins the shared
+      effect language, internalizes the materialize and dry-run step folds,
+      and proves their tag agreement for every program.
     '';
     sections = [
       {
         title = "What is proven";
         body = ''
-          The bridge relates the Node service builder and the C code generation
-          builder through the common `BuilderSpec` surface and the shared
-          builder effect language.
+          The bridge relates all four example builders — Node service, C code
+          generation, OCI image, and IDL — through the common `BuilderSpec`
+          surface and the shared builder effect language. Each kind carries
+          the same theorem family: ornament membership, forget codomain and
+          computation, and program compilation factoring through forget with
+          no bypass. The IDL theorems track the two-level forget through
+          `CodeGenBuilder` down to `BuilderSpec`. The final group internalizes
+          the materialize and dry-run step folds and proves they agree on
+          step tags for every program; the Node and C builders additionally
+          carry intersection theorems over their actual tool and
+          output-format lists.
 
           ${proofNote}${renderedTheorems}
         '';
@@ -70,7 +87,9 @@ let
       {
         title = "Normal forms";
         body = ''
-          The bridge derives these values from the loaded builder specs:
+          The list-intersection theorems run over the Node and C builders'
+          actual lists. The bridge derives these values from the loaded
+          builder specs:
 
           - BuilderSpec fields: ${renderInlineList bridgeModel.normalForms.builderSpecFields}
           - Node base name: `${bridgeModel.normalForms.node.baseName}`
@@ -88,9 +107,11 @@ let
         body = ''
           The checked bridge covers the relationships currently resident in the
           kernel: ornament membership, forget maps, the common effect carrier,
-          and derived list computations over strings. The self-views remain
-          documentation views over the resulting builder programs; they consume
-          these facts but are not themselves proof terms.
+          derived list computations over strings, and the internalized
+          materialize and dry-run tag folds together with their agreement
+          theorem. The self-views remain documentation views over the
+          resulting builder programs; they consume these facts but are not
+          themselves proof terms.
         '';
       }
     ];

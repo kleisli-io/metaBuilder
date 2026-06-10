@@ -5,7 +5,7 @@ All notable changes to metaBuilder are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2026-06-10
 
 ### Headline changes
 
@@ -44,9 +44,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - End-to-end IDL builder example running program interpreters against one
   typed builder spec.
 - Loader test suite with filesystem fixtures.
+- Split test surface: kernel-heavy checks (long normalizations) live in
+  `tests.nix-unit-heavy` (flake output `tests-heavy`, run via
+  `nix-unit --flake .#tests-heavy`); the default `tests` suite and
+  `checks` stay fast. Docs builds kernel-check every theorem except
+  heavy-flagged ones, whose results defer to the heavy suite.
+- Flake consumer surface: `lib.mkMb pkgs` builds the library against
+  the caller's nixpkgs with nix-effects from the flake input.
 - Standalone scaffold: `flake.nix`, `flake.lock`, `locked.nix`,
-  `shell.nix`, `Justfile`, `tests.nix`, `internal.nix`, and
-  `version.sexp`.
+  `shell.nix`, `Justfile`, `tests.nix`, `internal.nix`,
+  `version.sexp`, and CI workflows (flake check on pushes and pull
+  requests; GitHub Release with changelog notes on version tags).
 
 ### Notes
 

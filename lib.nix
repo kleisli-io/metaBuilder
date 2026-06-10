@@ -38,6 +38,9 @@ let
   inlineTests = api.extractTests internals.raw
     // api.extractTests internals.testRaw
     // api.extractTests internals.examplesRaw;
+  heavyInlineTests = api.extractHeavyTests internals.raw
+    // api.extractHeavyTests internals.testRaw
+    // api.extractHeavyTests internals.examplesRaw;
   testResults = api.runTests inlineTests;
   docsTree = api.extractDocs internals.raw;
   examplesDocs = api.extractDocs (internals.examplesRaw.value or internals.examplesRaw);
@@ -60,7 +63,7 @@ mb // {
   inherit api;
   version = "0.1.0";
   examples = api.extractValue internals.examplesRaw;
-  tests = testResults // { nix-unit = inlineTests; };
+  tests = testResults // { nix-unit = inlineTests; nix-unit-heavy = heavyInlineTests; };
   extractDocs = docsTree // { examples = examplesDocs; };
   inherit mkDocsContent;
   docs = docsTree // {

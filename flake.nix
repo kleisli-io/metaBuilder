@@ -26,11 +26,23 @@
       };
     in
     {
+      # Consumer surface: `metaBuilder.lib.mkMb pkgs` builds the library
+      # against the caller's nixpkgs, with nix-effects from this flake's
+      # input (override via `inputs.metaBuilder.inputs.nix-effects.follows`).
+      lib.mkMb = mkMb;
+
       # Test attrset for nix-unit: inline tests ({ expr; expected; }) and
       # integration tests (booleans wrapped as { expr; expected = true; }).
       tests =
         let pkgs = import nixpkgs { system = "x86_64-linux"; };
         in (mkMb pkgs).tests.nix-unit;
+
+      # Kernel-heavy checks (long normalizations, minutes to hours); excluded
+      # from `tests` and `checks`. Run explicitly:
+      #   nix-unit --flake .#tests-heavy
+      tests-heavy =
+        let pkgs = import nixpkgs { system = "x86_64-linux"; };
+        in (mkMb pkgs).tests.nix-unit-heavy;
 
       checks = forAllSystems (system:
         let

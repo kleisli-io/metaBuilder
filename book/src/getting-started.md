@@ -3,7 +3,38 @@
 This chapter shows the smallest useful shape. Define a builder spec, turn it into
 a program, and ask the program for several views.
 
-Assume `mb` and `pkgs` are in scope.
+## Getting metaBuilder
+
+As a flake input:
+
+```nix
+{
+  inputs.metaBuilder.url = "github:kleisli-io/metaBuilder";
+
+  outputs = { nixpkgs, metaBuilder, ... }:
+    let
+      pkgs = nixpkgs.legacyPackages.x86_64-linux;
+      mb = metaBuilder.lib.mkMb pkgs;
+    in {
+      # use mb here
+    };
+}
+```
+
+`mkMb` builds the library against your `pkgs` and supplies the
+nix-effects library from the flake's own input. Pin your own
+nix-effects with `inputs.metaBuilder.inputs.nix-effects.follows`.
+
+Without flakes, import the source tree with explicit arguments:
+
+```nix
+let
+  fx = import nix-effects-src { inherit pkgs; lib = pkgs.lib; };
+  mb = import metaBuilder-src { inherit pkgs fx; lib = pkgs.lib; };
+in ...
+```
+
+The rest of this chapter assumes `mb` and `pkgs` are in scope.
 
 ```nix
 let

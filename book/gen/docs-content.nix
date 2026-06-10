@@ -27,9 +27,6 @@ let
     namespaceRoot = "mb";
     description = "Typed builder DSL built on nix-effects descriptions and internalized programs.";
     sourceUrl = "https://github.com/kleisli-io/metaBuilder";
-    # Unlisted on docs.kleisli.io: excluded from hub/llms.txt/sitemap/search/MCP
-    # listings, served by direct URL with noindex. Flip when published.
-    draft = true;
   };
   apiSections = [
     {

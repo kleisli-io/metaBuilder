@@ -34,35 +34,47 @@ rec {
   isDocChild = v:
     isApiChild v && !(v.docHidden or false);
 
-  extractTests = x:
+  # Tests declared with a "heavy-" name prefix (e.g. long kernel
+  # normalizations) are excluded from the default suite and surface in the
+  # heavy suite instead, with the prefix stripped. Heaviness is declared at
+  # the definition site; both extractors partition on names only, never
+  # forcing test values.
+  heavyTestPrefix = "heavy-";
+
+  extractTestsWith = wantHeavy: x:
     if (x._type or null) == "metaBuilder-api" then
       let
         ownTests = lib.mapAttrs'
           (name: test: {
-            name = "test-${name}";
+            name = "test-${lib.removePrefix heavyTestPrefix name}";
             value = test;
           })
-          x.tests;
+          (lib.filterAttrs
+            (name: _: lib.hasPrefix heavyTestPrefix name == wantHeavy)
+            x.tests);
         childTests =
           if builtins.isAttrs x.value
-          then walkNsTests x.value
+          then walkNsTests wantHeavy x.value
           else { };
       in
       ownTests // childTests
     else if builtins.isAttrs x && !(x ? _tag)
-    then walkNsTests x
+    then walkNsTests wantHeavy x
     else { };
+
+  extractTests = extractTestsWith false;
+  extractHeavyTests = extractTestsWith true;
 
   # Lazy per namespace: names at each level depend only on that level's
   # attrs, never on subtree contents. Empty namespaces are kept (pruning
   # them would force full-tree assembly to select a single test) and
   # nix-unit's "test*"-name convention is escaped here, where the
   # test-vs-namespace distinction is known without forcing values.
-  walkNsTests = ns:
+  walkNsTests = wantHeavy: ns:
     lib.mapAttrs'
       (name: v: {
         name = if lib.hasPrefix "test" name then "suite-${name}" else name;
-        value = extractTests v;
+        value = extractTestsWith wantHeavy v;
       })
       (lib.filterAttrs (_: v: isApiChild v) ns);
 

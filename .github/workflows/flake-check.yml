@@ -1,0 +1,31 @@
+name: Flake Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [labeled, opened, synchronize, reopened, review_requested, ready_for_review]
+  pull_request_review:
+    types: [submitted]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Flake check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: DeterminateSystems/nix-installer-action@v22
+        with:
+          # Plain upstream Nix is sufficient; this job just runs
+          # `nix flake check` and doesn't gate on evaluator version.
+          # Skipping Determinate avoids the FlakeHub login path.
+          determinate: false
+
+      - name: Run tests
+        run: nix flake check -L
