@@ -1,6 +1,8 @@
 # metaBuilder
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/kleisli-io/metaBuilder/actions/workflows/flake-check.yml/badge.svg)](https://github.com/kleisli-io/metaBuilder/actions/workflows/flake-check.yml)
+[![Release](https://img.shields.io/github/v/release/kleisli-io/metaBuilder)](https://github.com/kleisli-io/metaBuilder/releases)
 
 A typed builder DSL built on
 [nix-effects](https://github.com/kleisli-io/nix-effects).
