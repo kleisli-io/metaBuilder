@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package metabuilder.example;
+
+message Greeting {
+  string text = 1;
+  string language = 2;
+}
+
+service GreetingService {
+  rpc SayHello (Greeting) returns (Greeting);
+}
