@@ -9,14 +9,16 @@ let
     languages = [ "cpp" "java" ];
   };
 
-  program = mb.program.fromOrnamentedSpec idl.IdlBuilder.T spec;
+  program = mb.program.fromOrnamentedSpec
+    idl.IdlBuilder.T spec;
 
   value = {
     builder = {
       inherit (idl) IdlBuilder fromProtobuf descriptor schema;
     };
     inherit spec program;
-    validation = mb.program.validate.run program;
+    # Verdict only: the validated program value is already in scope.
+    validation = { inherit (mb.program.validate.run program) ok diagnostics; };
     deps = mb.program.deps.run program;
     dryRun = mb.program."dry-run".run program;
     planView = mb.program."plan-view".run program;

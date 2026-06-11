@@ -31,6 +31,14 @@
       # input (override via `inputs.metaBuilder.inputs.nix-effects.follows`).
       lib.mkMb = mkMb;
 
+      # Worked examples (mb.examples) for direct evaluation, e.g.
+      #   nix eval .#examples.idl.validation
+      # Pinned to x86_64-linux like `tests` — eval-time only, the
+      # system only affects tool outPaths threaded into views.
+      examples =
+        let pkgs = import nixpkgs { system = "x86_64-linux"; };
+        in (mkMb pkgs).examples;
+
       # Test attrset for nix-unit: inline tests ({ expr; expected; }) and
       # integration tests (booleans wrapped as { expr; expected = true; }).
       tests =
